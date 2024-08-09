@@ -33,5 +33,66 @@
   )
 )
 
+;;a function which is the reimplementation of the orSubTreeIterator function found in python
 
+(: orSubTreeIterator(-> Tree (List Tree) Tree (List Tree) (List Tree) Signal))
+(= (orSubTreeIterator $child $remainingChildren $currentNode $dominantSet $commandSet) 
+(let*
+ (
+    ($localCommandSet (commandSet))
+    ($localCommandSetUpdated (commandSetIterator $remainingChildren $localCommandSet))
+    ($action (orSubTreeElegance $child $currentNode $dominantSet $localCommandSetUpdated))
+ )
+ (case $action
+     (
+        (ADVANCE
+         (if (> (length $remainingChildren) 0)
+             (orSubTreeIterator (head $remainingChildren) (tail $remainingChildren) $currentNode $dominantSet $commandSet)
+             (None $currentNode)
+         )
+        )
+        (RESET
+         (None $currentNode)
+        )
+        ($else ($action $currentNode))
+
+     )
+ 
+ )
+))
+
+
+;;a function which is the reimplementation of the andSubTreeIterator function found in python
+
+(: andSubTreeIterator(-> (List Tree) Tree (List Tree) (List Tree) (-> (List Tree) Tree (List Tree) (List Tree) Number Signal))))
+(= (andSubTreeIterator $children $currentNode $handleSet $commandSet) 
+    (andSubTreeIterator $children $currentNode $handleSet $commandSet 0)
+)
+(: andSubTreeIterator(-> (List Tree) Tree (List Tree) (List Tree) Number Signal))
+(= (andSubTreeIterator $children $currentNode $handleSet $commandSet $currentChildIndex) 
+(if (== (length $children) 0) (None $currentNode)
+(let*
+ (
+    ($currentChild (index $currentChildIndex $children))
+    ($action (andSubTreeElegance $currentChild $currentNode $handleSet $commandSet))
+ )
+ (case $action
+     (
+        (ADVANCE
+         (if (< (+ $currentChildIndex 1) (length $children) )
+             (andSubTreeIterator $children $currentNode $handleSet $commandSet (+ $currentChildIndex 1))
+             (None $currentNode)
+         )
+        )
+        (RESET
+         (andSubTreeIterator $children $currentNode $handleSet $commandSet 0)
+        )
+        ($else ($action $currentNode))
+
+     )
+ 
+ )
+)
+)
+)
 
